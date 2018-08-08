@@ -44,7 +44,7 @@ int main() {
 
 	
 
-	const int amount = 20;
+	const int amount = 100;
 	float* height = generateHeightMap(amount);
 	int blockAmount = std::pow(amount, 2);
 	int max = blockAmount;
