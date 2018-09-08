@@ -7,6 +7,8 @@
 #include <Utils/Log.h>
 #include <Utils/FileUtils.h>
 #include <filesystem>
+#include <noise/noise.h>
+#include <noiseutils.h>
 #include "CubeData.h"
 
 
@@ -14,17 +16,7 @@ using namespace Engine;
 using namespace Graphics;
 using namespace Math;
 
-float* generateHeightMap(int amount) {
-	srand(time(NULL));
-	float* height = new float[amount * amount]();
-	for (int i = 0; i < amount; i++) {
-		for (int j = 0; j < amount; j++) {
-			float h = float(rand() % 10);
-			height[i * amount + j] = h == 0 ? 1 : h;
-		}
-	}
-	return height;
-}
+
 
 
 
@@ -37,31 +29,38 @@ int main() {
 	}
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+	
 
 	Vec3 cubeColor = Vec3(0, 150, 0) / 255;
 	Vec3 clearColor = Vec3(135, 206, 250) / 255;
 	glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0);
 
+	noise::module::Perlin perlinModule;
+	utils::NoiseMap heightMap;
+	utils::NoiseMapBuilderPlane heightMapBuilder;
+	heightMapBuilder.SetSourceModule(perlinModule);
+	heightMapBuilder.SetDestNoiseMap(heightMap);
+	heightMapBuilder.SetDestSize(200, 200);
+	heightMapBuilder.SetBounds(0.0, 6.0, 0.0, 6.0);
+	heightMapBuilder.Build();
+
 	
 
-	const int amount = 100;
-	float* height = generateHeightMap(amount);
+	const int amount = 200;
 	int blockAmount = std::pow(amount, 2);
-	int max = blockAmount;
-	for (int i = 0; i < max; i++)
-		blockAmount += int(height[i]) - 1;
+	int maxHeight = 15;
 
 
 	std::vector<Mat4> translation;
 	for (int x = 0; x < amount; x++) {
 		for (int z = 0; z < amount; z++) {
-			int h = int(height[x * amount + z]);
+			int h = heightMap.GetValue(x, z)* maxHeight;
+			h = h <= 0 ? 1 : h;
 			for (int y = 0; y < h; y++)
 				translation.push_back(Mat4::translation(Vec3(x, y, z)));
 		}
 	}
 
-	delete[] height;
 
 	VertexBuffer vbo = VertexBuffer(cubeVerticesUV, sizeof(cubeVerticesUV));
 	VBLayout layout;
@@ -75,7 +74,7 @@ int main() {
 	std::string vertex = std::filesystem::absolute("Source/Resources/Shaders/CubeVertex.shader").generic_string();
 	std::string frag = std::filesystem::absolute("Source/Resources/Shaders/CubeFragment.shader").generic_string();
 	Shader shader(vertex, frag);
-	Camera camera = Camera(window, 0.1f, 200.f);
+	Camera camera = Camera(window, 0.1f, 500.f);
 	camera.setPosition(Vec3(0, 5, 0));
 	shader.setUniform3f("u_Color", cubeColor);
 	shader.setUniformMatrix4fv("u_View", camera.getViewMatrix());
@@ -84,9 +83,11 @@ int main() {
 	Texture texture("Source/Resources/Textures/grass_side.png", GL_NEAREST);
 	texture.setSlot();
 	BasicRenderer r;
-
+	
 
 	Utils::Clock clock;
+
+
 	while (window.isKeyReleased(GLFW_KEY_ESCAPE) && !window.isClosed()) {
 		r.renderArraysInstanced(vao, shader, 0, 36, translation.size());
 		camera.update(window, clock.getTimePassed());

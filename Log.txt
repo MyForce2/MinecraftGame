@@ -1,4 +1,4 @@
-Log started on : Wed Aug  8 19:42:41 2018
-[Wed Aug  8 19:42:41 2018] [Info] Start
-[Wed Aug  8 19:42:41 2018] [Warning] Location is -1 for uniform : u_Color
-Log ended on : Wed Aug  8 19:42:43 2018
+Log started on : Sun Sep  9 01:28:14 2018
+[Sun Sep  9 01:28:14 2018] [Info] Start
+[Sun Sep  9 01:28:14 2018] [Warning] Location is -1 for uniform : u_Color
+Log ended on : Sun Sep  9 01:28:50 2018
