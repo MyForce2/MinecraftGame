@@ -1,5 +1,4 @@
-Log started on : Tue Sep 11 20:35:10 2018
-[Tue Sep 11 20:35:10 2018] [Info] Start
-[Tue Sep 11 20:35:11 2018] [Info] Cube amount : 327886
-[Tue Sep 11 20:35:11 2018] [Warning] Location is -1 for uniform : u_Color
-Log ended on : Tue Sep 11 20:36:12 2018
+Log started on : Thu Oct 11 07:31:21 2018
+[Thu Oct 11 07:31:21 2018] [Info] Start
+[Thu Oct 11 07:31:22 2018] [Info] Cube amount : 58741959
+Log ended on : Thu Oct 11 07:31:46 2018
