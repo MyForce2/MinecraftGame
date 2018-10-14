@@ -137,6 +137,7 @@ int main() {
 	texture.setSlot();
 	BasicRenderer r;
 	
+	std::cout << glGetError() << std::endl;
 
 	Utils::Clock clock;
 
