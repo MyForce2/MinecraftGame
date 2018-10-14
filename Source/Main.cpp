@@ -122,11 +122,13 @@ int main() {
 	
 	std::string vertex = std::filesystem::absolute("Source/Resources/Shaders/CubeVertex.shader").generic_string();
 	std::string frag = std::filesystem::absolute("Source/Resources/Shaders/CubeFragment.shader").generic_string();
+	std::string v1 = "Source/Resources/Shaders/CubeVertex.shader";
+	std::string f1 = "Source/Resources/Shaders/CubeFragment.shader";
 	Camera camera = Camera(window, 0.1f, 500.f);
 	camera.setPosition(Vec3(0, 130, 0));
 
 	Mat4 vp = camera.getProjectionMatrix() * camera.getViewMatrix();
-	Shader shader(vertex, frag);
+	Shader shader(v1, f1);
 	shader.bind();
 
 	shader.setUniformMatrix4fv("u_VP", vp);
