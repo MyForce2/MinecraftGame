@@ -36,6 +36,9 @@ namespace Engine {
 		*/
 		class BatchRenderer {
 		private:
+
+			// OpenGL objects (GPU data)
+
 			IndexBuffer* ibo;
 			VertexBuffer* vbo;
 			VertexArray vao;
@@ -50,11 +53,14 @@ namespace Engine {
 			std::array<GLuint, 10> textureSlots;
 
 			
-			static const unsigned int FONT_SIZE = 192;
-			static const unsigned short INDICES_PER_OBJECT = 6;
-			static const unsigned short MAX_OBJECTS = 10000;
-			static const unsigned short IBO_SIZE = INDICES_PER_OBJECT * MAX_OBJECTS;
-			static const unsigned int VBO_SIZE = sizeof(BatchVertex) * 4 * MAX_OBJECTS;
+			// The amount of indices per batched object
+			static const unsigned short INDICES_PER_OBJECT;
+			// The maximum amount of objects added before a flush is required
+			static const unsigned short MAX_OBJECTS;
+			// The size of the index buffer containing the indices data
+			static const unsigned short IBO_SIZE;
+			// The size of the vertex buffer 
+			static const unsigned int VBO_SIZE;
 
 		public:
 			BatchRenderer();

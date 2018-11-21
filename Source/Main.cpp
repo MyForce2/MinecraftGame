@@ -11,71 +11,27 @@
 #include <noiseutils.h>
 #include <unordered_map>
 #include "World/CubeData.h"
+#include "World/Chunk.h"
+#include "Graphics/Font/FontManager.h"
+#include <boost/functional/hash.hpp>
+#include "World/ChunkManager.h"
 
 
 using namespace Engine;
 using namespace Graphics;
 using namespace Math;
 using namespace Utils;
+using namespace Minecraft;
+using namespace World;
 
 
 
 
+void createChunk(std::vector<Mat4>& translation, const int amount, std::vector<Minecraft::World::Chunk*>& chunks) {
 
-
-void createChunk(std::vector<Mat4>& translation, const int amount) {
-	noise::module::Perlin perlinModule;
-	perlinModule.SetOctaveCount(1);
-	perlinModule.SetFrequency(0.40);
-	perlinModule.SetPersistence(2.0);
-	utils::NoiseMap heightMap;
-	utils::NoiseMapBuilderPlane heightMapBuilder;
-	heightMapBuilder.SetSourceModule(perlinModule);
-	heightMapBuilder.SetDestNoiseMap(heightMap);
-	heightMapBuilder.SetDestSize(200, 200);
-	heightMapBuilder.SetBounds(0.0, 4.0, 0.0, 4.0);
-	heightMapBuilder.Build();
-
-	int maxHeight = 30;
-
-	Clock clock;
-
-	auto getHeight = [&maxHeight](float heightValue) -> int {
-		heightValue += 1;
-		heightValue /= 2;
-		int height = heightValue * maxHeight;
-		return height <= 0 ? 1 : height;
-	};
-	
-	for (int x = 0; x < amount; x++) {
-		int height = getHeight(heightMap.GetValue(x, 0));
-		int heightTwo = getHeight(heightMap.GetValue(x, amount - 1));
-		for (int y = 0; y < height + 78; y++)
-			translation.push_back(Mat4::translation(Vec3(x, y, 0)));
-		for (int y = 0; y < heightTwo + 78; y++)
-			translation.push_back(Mat4::translation(Vec3(x, y, amount - 1)));
-	}
-
-	for (int z = 0; z < amount; z++) {
-		int height = getHeight(heightMap.GetValue(0, z));
-		int heightTwo = getHeight(heightMap.GetValue(amount - 1, z));
-		for (int y = 0; y < height + 78; y++)
-			translation.push_back(Mat4::translation(Vec3(0, y, z)));
-		for (int y = 0; y < heightTwo + 78; y++)
-			translation.push_back(Mat4::translation(Vec3(amount - 1, y, z)));
-	}
-
-	for (int x = 0; x < amount; x++) {
-		for (int z = 0; z < amount; z++) {
-			int height = getHeight(heightMap.GetValue(x, z));
-			translation.push_back(Mat4::translation(Vec3(x, height + 78, z)));
-			translation.push_back(Mat4::translation(Vec3(x, 0, z)));
-		}
-	}
-
-
-	std::cout << "Time : " << clock.getTimePassed() << "s\n";
 }
+
+
 
 
 
@@ -89,16 +45,21 @@ int main() {
 	}
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_BLEND);
 	
 
 	Vec3 cubeColor = Vec3(100, 150, 0) / 255;
+	auto res = std::hash<Vec3>()(cubeColor);
 	Vec3 clearColor = Vec3(135, 206, 250) / 255;
 	glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0);
 
 	const int amount = 200;
 	int maxHeight = 30;
 	std::vector<Mat4> translation;
-	createChunk(translation, amount);
+	std::vector<Minecraft::World::Chunk*> chunks;
+	createChunk(translation, amount, chunks);
 
 	int cubeAmount = std::pow(std::sqrt(translation.size()), 3);
 
@@ -109,21 +70,13 @@ int main() {
 	// Top = 6 Vertices
 
 
-
-	VertexBuffer vbo = VertexBuffer(cubeVerticesUV, sizeof(cubeVerticesUV));
-	VBLayout layout;
-	layout.addElement(3, GL_FLOAT);
-	layout.addElement(3, GL_FLOAT);
-	layout.addElement(2, GL_FLOAT);
-	VertexArray vao;
-	vao.addBuffer(vbo, layout);
-	VertexBuffer v(translation.data(), sizeof(Mat4) * translation.size());
-	vao.addInstancedMatrixBuffer(v);
 	
 	std::string vertex = std::filesystem::absolute("Source/Resources/Shaders/CubeVertex.shader").generic_string();
 	std::string frag = std::filesystem::absolute("Source/Resources/Shaders/CubeFragment.shader").generic_string();
 	std::string v1 = "Source/Resources/Shaders/CubeVertex.shader";
 	std::string f1 = "Source/Resources/Shaders/CubeFragment.shader";
+	std::string v2 = "Source/Resources/Shaders/BatchQuadVertex.shader";
+	std::string f2 = "Source/Resources/Shaders/BatchQuadFragment.shader";
 	Camera camera = Camera(window, 0.1f, 500.f);
 	camera.setPosition(Vec3(0, 130, 0));
 
@@ -141,15 +94,41 @@ int main() {
 
 	Utils::Clock clock;
 
+	Layer2D l(600.f, 800.f, v2, f2);
+	FontManager* manager = FontManager::getFontManager();
+	const std::string fontPath = "Source/Resources/Fonts/Times New Roman.ttf";
+	manager->add(fontPath, 72);
+	auto f = manager->get(fontPath, 72);
+	ChunkManager* cManager = ChunkManager::getManager();
+	for (int i = 0; i < 10; i++) {
+		for (int j = 0; j < 10; j++) {
+			cManager->addChunk(IVec2(i, j));
+		}
+	}
+	cManager->setShader(&shader);
+	
+	Label lbl("Hello", f);
+	lbl.setLabelColor(Vec3(255, 0, 0));
+	lbl.setStartPosition(Vec2(100));
 
 	while (window.isKeyReleased(GLFW_KEY_ESCAPE) && !window.isClosed()) {
-		r.renderArraysInstanced(vao, shader, 0, 36, translation.size());
+		l.startFrame();
+		l.add(lbl);
+		texture.setSlot();
+		cManager->updateRenderList(camera);
+		cManager->render();
 		camera.update(window, clock.getTimePassed());
+		cManager->playerPosition = camera.getPosition();
 		clock.reset();
 		vp = camera.getProjectionMatrix() * camera.getViewMatrix();
 		shader.setUniformMatrix4fv("u_VP", vp);
+		glEnable(GL_BLEND);
+		l.render();
+		glDisable(GL_BLEND);
 		window.update();
 	}
 	std::cout << "Hello" << std::endl;
+
+	Log::getLog()->logInfo("End");
 	Utils::Log::getLog()->closeLog();
 }
