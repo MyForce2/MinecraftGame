@@ -1,4 +1,13 @@
-Log started on : Sun Oct 14 07:31:02 2018
-[Sun Oct 14 07:31:02 2018] [Info] Start
-[Sun Oct 14 07:31:03 2018] [Info] Cube amount : 58741959
-Log ended on : Sun Oct 14 07:31:05 2018
+Log started on : Mon Dec 17 16:09:43 2018
+[Mon Dec 17 16:09:43 2018] [Info] Start
+[Mon Dec 17 16:09:44 2018] [Info] Cube amount : 0
+[Mon Dec 17 16:09:44 2018] [Info] Created OpenGL program : 
+[Mon Dec 17 16:09:44 2018] [Info] Vertex path : Source/Resources/Shaders/CubeVertex.shader
+[Mon Dec 17 16:09:44 2018] [Info] Fragment path : Source/Resources/Shaders/CubeFragment.shader
+[Mon Dec 17 16:09:44 2018] [Info] Created texture : (Source/Resources/Textures/DefaultPack2.png)
+[Mon Dec 17 16:09:44 2018] [Info] Batch Renderer initialized
+[Mon Dec 17 16:09:44 2018] [Info] Created OpenGL program : 
+[Mon Dec 17 16:09:44 2018] [Info] Vertex path : Source/Resources/Shaders/BatchQuadVertex.shader
+[Mon Dec 17 16:09:44 2018] [Info] Fragment path : Source/Resources/Shaders/BatchQuadFragment.shader
+[Mon Dec 17 16:10:21 2018] [Info] End
+Log ended on : Mon Dec 17 16:10:21 2018

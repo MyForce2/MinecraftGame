@@ -19,13 +19,19 @@ namespace Minecraft {
 			std::vector<Chunk*> renderedChunks;
 			HeightMap* heightMap;
 			Engine::Math::Vec3 playerPosition;
+			bool worldLoaded;
+			std::mutex chunksLock;
 			
 			// OpenGL graphics data
 
 			Engine::Graphics::VertexBuffer cubeData;
 			Engine::Graphics::Shader* shader;
 
+			// Singleton instance
+
 			static ChunkManager* manager;
+
+			// Constants
 
 			static const int NOISE_OCTAVE_COUNT;
 			static const int WORLD_SIZE;
@@ -46,6 +52,8 @@ namespace Minecraft {
 
 			bool hasChunk(const Engine::Math::IVec2& chunkPosition) const;
 			void addChunk(const Engine::Math::IVec2& chunkPosition);
+			void addChunkRange(const Engine::Math::IVec2& startPosition, const Engine::Math::IVec2& endPosition);
+			void loadWorld();
 			
 			void updateRenderList(const Engine::Graphics::Camera& camera);
 			void render();

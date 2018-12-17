@@ -2,7 +2,7 @@
 
 layout(location = 0) out vec4 color;
 
-in vec2 v_Normal;
+in vec3 v_Normal;
 in vec2 v_UV;
 
 uniform vec3 u_Color;

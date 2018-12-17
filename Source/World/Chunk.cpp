@@ -9,18 +9,18 @@ namespace Minecraft {
 		using namespace Math;
 		using namespace Graphics;
 
-		const int Chunk::CHUNK_MAX_HEIGHT = 50;
-		const int Chunk::CHUNK_SIZE = 20;
-		const int Chunk::SURFACE_MAX_HEIGHT = 40;
-		const int Chunk::DOWNWARDS_HEIGHT = CHUNK_MAX_HEIGHT - SURFACE_MAX_HEIGHT;
-		const int Chunk::CHUNK_TOP_CUBES = 5;
+		const std::atomic<int> Chunk::CHUNK_MAX_HEIGHT = 50;
+		const std::atomic<int> Chunk::CHUNK_SIZE = 20;
+		const std::atomic<int> Chunk::SURFACE_MAX_HEIGHT = 40;
+		const std::atomic<int> Chunk::DOWNWARDS_HEIGHT = CHUNK_MAX_HEIGHT - SURFACE_MAX_HEIGHT;
+		const std::atomic<int> Chunk::CHUNK_TOP_CUBES = 5;
 
-		Chunk::Chunk(const HeightMap& map, const IVec2& chunkCoordinate, const Graphics::VertexBuffer& vertices) :
-			map(map), chunkCoordinate(chunkCoordinate), CUBE_DATA(vertices), 
+		Chunk::Chunk(HeightMap& map, const IVec2& chunkCoordinate) :
+			map(map), chunkCoordinate(chunkCoordinate),
 			center(chunkCoordinate.x * CHUNK_SIZE + CHUNK_SIZE / 2, chunkCoordinate.y * CHUNK_SIZE + CHUNK_SIZE / 2)
 				{
 			initBlocks();
-			initData();
+			initTrees();
 		}
 
 		Chunk::~Chunk() {
@@ -30,7 +30,8 @@ namespace Minecraft {
 
 		void Chunk::render(const Shader& shader) const {
 			BasicRenderer r;
-			CUBE_DATA.bind();
+			CUBE_DATA->bind();
+			shader.bind();
 			r.renderArraysInstanced(vao, shader, 0, 36, renderData.size());
 		}
 
@@ -95,10 +96,48 @@ namespace Minecraft {
 					blocksData[position].visible = true;
 				}
 			}
+		}
+
+		void Chunk::initTrees() {
+			std::atomic<int> k = 2;
+			srand(time(NULL));
+			int val = rand() % 100;
+			if (val > 30)
+				return;
+			int x = rand() % ((chunkCoordinate.x + 1) * CHUNK_SIZE);
+			int z = rand() % ((chunkCoordinate.y + 1) * CHUNK_SIZE);
+			x = x < CHUNK_SIZE * chunkCoordinate.x ? x + CHUNK_SIZE : x;
+			z = z < CHUNK_SIZE * chunkCoordinate.y ? z + CHUNK_SIZE : z;
+			int y = getColumnHeight(x, z);
+			Vec3 position(x, y + 1, z);
+			Vec3 treeTexture(4.0f, 5.0f, 5.0f);
+			Vec3 leafTexture(6.0f);
+			for (int i = 0; i < 5; i++) {
+				blocksData[position] = { treeTexture, true };
+				renderData.push_back(Mat4::translation(position));
+				cubesTextures.push_back(treeTexture);
+				position.y++;
+			}
+			Vec3 leafStartPosition(position);
+			leafStartPosition.x -= 1;
+			leafStartPosition.z -= 1;
+			for (int y = 0; y < 3; y++) {
+				float leafY = float(leafStartPosition.y + y);
+				for (int x = 0; x < 3; x++) {
+					float leafX = float(leafStartPosition.x + x);
+					for (int z = 0; z < 3; z++) {
+						Vec3 leafPos(leafX, leafY, leafStartPosition.z + z);
+						blocksData[leafPos] = { leafTexture, true };
+						renderData.push_back(Mat4::translation(leafPos));
+						cubesTextures.push_back(leafTexture);
+					}
+				}
+			}
 
 		}
 
-		void Chunk::initData() {
+		void Chunk::initData(const Graphics::VertexBuffer& vbo) {
+			CUBE_DATA = &vbo;
 			matrixBuffer = new VertexBuffer(renderData.data(), sizeof(Mat4) * renderData.size(), GL_DYNAMIC_DRAW);
 			textureDataBuffer = new VertexBuffer(cubesTextures.data(), sizeof(Vec3) * cubesTextures.size(), GL_DYNAMIC_DRAW);
 			VBLayout layout;
@@ -107,7 +146,7 @@ namespace Minecraft {
 			layout.addElement(2, GL_FLOAT);
 			VBLayout textureLayout;
 			textureLayout.addElement(3, GL_FLOAT);
-			vao.addBuffer(CUBE_DATA, layout);
+			vao.addBuffer(*CUBE_DATA, layout);
 			vao.addInstancedBuffer(*textureDataBuffer, textureLayout);
 			vao.addInstancedMatrixBuffer(*matrixBuffer);
 		}
@@ -125,6 +164,18 @@ namespace Minecraft {
 			if (height - y < 11)
 				return Vec3(2.0f);
 			return Vec3(3.0f);
+		}
+
+		int Chunk::getColumnHeight(float x, float z) const {
+			float y = 0.0f;
+			for (auto pair : blocksData) {
+				const Vec3& blockPosition = pair.first;
+				if (blockPosition.x == x && blockPosition.z == z) {
+					if (blockPosition.y > y)
+						y = blockPosition.y;
+				}
+			}
+			return int(y);
 		}
 	}
 }

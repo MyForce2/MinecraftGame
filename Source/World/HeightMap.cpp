@@ -9,7 +9,7 @@ namespace Minecraft {
 		using namespace noise;
 
 
-		HeightMap::HeightMap(const IVec2& destinationSize, const Vec2& bounds, const NoiseModuleData& data) {
+		HeightMap::HeightMap(const IVec2& destinationSize, const Vec2& bounds, const NoiseModuleData& data) : lock() {
 			// Creating the noise module for the height map
 			module::Perlin perlinModule;
 			// Adjusting noise module parameters for desired map layout
@@ -25,7 +25,8 @@ namespace Minecraft {
 			mapBuilder.Build();
 		}
 
-		float HeightMap::operator[](const IVec2& position) const {
+		float HeightMap::operator[](const IVec2& position) {
+			std::lock_guard<std::mutex> guard(lock);
 			return heightMap.GetValue(position.x, position.y);
 		}
 	}

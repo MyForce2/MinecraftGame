@@ -78,7 +78,7 @@ int main() {
 	std::string v2 = "Source/Resources/Shaders/BatchQuadVertex.shader";
 	std::string f2 = "Source/Resources/Shaders/BatchQuadFragment.shader";
 	Camera camera = Camera(window, 0.1f, 500.f);
-	camera.setPosition(Vec3(0, 130, 0));
+	camera.setPosition(Vec3(0, 40.0f, 0));
 
 	Mat4 vp = camera.getProjectionMatrix() * camera.getViewMatrix();
 	Shader shader(v1, f1);
@@ -100,16 +100,18 @@ int main() {
 	manager->add(fontPath, 72);
 	auto f = manager->get(fontPath, 72);
 	ChunkManager* cManager = ChunkManager::getManager();
-	for (int i = 0; i < 10; i++) {
-		for (int j = 0; j < 10; j++) {
-			cManager->addChunk(IVec2(i, j));
-		}
-	}
+	cManager->loadWorld();
+	//for (int i = 0; i < 2; i++) {
+	//	for (int j = 0; j < 2; j++) {
+	//		cManager->addChunk(IVec2(i, j));
+	//	}
+	//}
 	cManager->setShader(&shader);
 	
 	Label lbl("Hello", f);
 	lbl.setLabelColor(Vec3(255, 0, 0));
 	lbl.setStartPosition(Vec2(100));
+
 
 	while (window.isKeyReleased(GLFW_KEY_ESCAPE) && !window.isClosed()) {
 		l.startFrame();

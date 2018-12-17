@@ -2,6 +2,7 @@
 
 #include "noiseutils.h"
 #include "Math/Vectors/IVec2.h"
+#include <mutex>
 
 
 namespace Minecraft {
@@ -27,11 +28,12 @@ namespace Minecraft {
 		class HeightMap {
 		public:
 			utils::NoiseMap heightMap;
+			std::mutex lock;
 
 		public:
 			HeightMap(const Engine::Math::IVec2& destinationSize, const Engine::Math::Vec2& bounds, const NoiseModuleData& data);
 
-			float operator[](const Engine::Math::IVec2& position) const;
+			float operator[](const Engine::Math::IVec2& position);
 
 		};
 	}
