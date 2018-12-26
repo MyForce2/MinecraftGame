@@ -1,13 +1,12 @@
-Log started on : Mon Dec 17 16:09:43 2018
-[Mon Dec 17 16:09:43 2018] [Info] Start
-[Mon Dec 17 16:09:44 2018] [Info] Cube amount : 0
-[Mon Dec 17 16:09:44 2018] [Info] Created OpenGL program : 
-[Mon Dec 17 16:09:44 2018] [Info] Vertex path : Source/Resources/Shaders/CubeVertex.shader
-[Mon Dec 17 16:09:44 2018] [Info] Fragment path : Source/Resources/Shaders/CubeFragment.shader
-[Mon Dec 17 16:09:44 2018] [Info] Created texture : (Source/Resources/Textures/DefaultPack2.png)
-[Mon Dec 17 16:09:44 2018] [Info] Batch Renderer initialized
-[Mon Dec 17 16:09:44 2018] [Info] Created OpenGL program : 
-[Mon Dec 17 16:09:44 2018] [Info] Vertex path : Source/Resources/Shaders/BatchQuadVertex.shader
-[Mon Dec 17 16:09:44 2018] [Info] Fragment path : Source/Resources/Shaders/BatchQuadFragment.shader
-[Mon Dec 17 16:10:21 2018] [Info] End
-Log ended on : Mon Dec 17 16:10:21 2018
+Log started on : Wed Dec 26 19:02:25 2018
+[Wed Dec 26 19:02:25 2018] [Info] Start
+[Wed Dec 26 19:02:25 2018] [Info] Created OpenGL program : 
+[Wed Dec 26 19:02:25 2018] [Info] Vertex path : Source//Resources//Shaders//CubeVertex.shader
+[Wed Dec 26 19:02:25 2018] [Info] Fragment path : Source//Resources//Shaders//CubeFragment.shader
+[Wed Dec 26 19:02:25 2018] [Info] Created texture : (Source//Resources/Textures/DefaultPack2.png)
+[Wed Dec 26 19:02:25 2018] [Info] Batch Renderer initialized
+[Wed Dec 26 19:02:25 2018] [Info] Created OpenGL program : 
+[Wed Dec 26 19:02:25 2018] [Info] Vertex path : Source//Resources//Shaders//BatchQuadVertex.shader
+[Wed Dec 26 19:02:25 2018] [Info] Fragment path : Source//Resources//Shaders//BatchQuadFragment.shader
+[Wed Dec 26 19:02:28 2018] [Info] End
+Log ended on : Wed Dec 26 19:02:28 2018

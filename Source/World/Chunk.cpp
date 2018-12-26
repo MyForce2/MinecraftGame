@@ -2,6 +2,7 @@
 
 #include "Graphics/Rendering/BasicRenderer.h"
 #include <unordered_map>
+#include <random>
 
 namespace Minecraft {
 	namespace World {
@@ -32,7 +33,7 @@ namespace Minecraft {
 			BasicRenderer r;
 			CUBE_DATA->bind();
 			shader.bind();
-			r.renderArraysInstanced(vao, shader, 0, 36, renderData.size());
+			r.renderArraysInstanced(*vao, shader, 0, 36, renderData.size());
 		}
 
 		void Chunk::initBlocks() {
@@ -99,15 +100,16 @@ namespace Minecraft {
 		}
 
 		void Chunk::initTrees() {
-			std::atomic<int> k = 2;
-			srand(time(NULL));
-			int val = rand() % 100;
-			if (val > 30)
+			std::random_device rd;
+			std::mt19937 generator(rd());
+			std::uniform_int_distribution distribution(0, 100);
+			int val = distribution(generator);
+			if (val > 60)
 				return;
-			int x = rand() % ((chunkCoordinate.x + 1) * CHUNK_SIZE);
-			int z = rand() % ((chunkCoordinate.y + 1) * CHUNK_SIZE);
-			x = x < CHUNK_SIZE * chunkCoordinate.x ? x + CHUNK_SIZE : x;
-			z = z < CHUNK_SIZE * chunkCoordinate.y ? z + CHUNK_SIZE : z;
+			std::uniform_int_distribution xRange(chunkCoordinate.x * CHUNK_SIZE, (chunkCoordinate.x + 1) * CHUNK_SIZE);
+			std::uniform_int_distribution zRange(chunkCoordinate.y * CHUNK_SIZE, (chunkCoordinate.y + 1) * CHUNK_SIZE);
+			int x = xRange(generator);
+			int z = zRange(generator);
 			int y = getColumnHeight(x, z);
 			Vec3 position(x, y + 1, z);
 			Vec3 treeTexture(4.0f, 5.0f, 5.0f);
@@ -137,18 +139,19 @@ namespace Minecraft {
 		}
 
 		void Chunk::initData(const Graphics::VertexBuffer& vbo) {
-			CUBE_DATA = &vbo;
+			CUBE_DATA = new VertexBuffer(vbo);
 			matrixBuffer = new VertexBuffer(renderData.data(), sizeof(Mat4) * renderData.size(), GL_DYNAMIC_DRAW);
 			textureDataBuffer = new VertexBuffer(cubesTextures.data(), sizeof(Vec3) * cubesTextures.size(), GL_DYNAMIC_DRAW);
+			vao = new VertexArray();
 			VBLayout layout;
 			layout.addElement(3, GL_FLOAT);
 			layout.addElement(3, GL_FLOAT);
 			layout.addElement(2, GL_FLOAT);
 			VBLayout textureLayout;
 			textureLayout.addElement(3, GL_FLOAT);
-			vao.addBuffer(*CUBE_DATA, layout);
-			vao.addInstancedBuffer(*textureDataBuffer, textureLayout);
-			vao.addInstancedMatrixBuffer(*matrixBuffer);
+			vao->addBuffer(*CUBE_DATA, layout);
+			vao->addInstancedBuffer(*textureDataBuffer, textureLayout);
+			vao->addInstancedMatrixBuffer(*matrixBuffer);
 		}
 
 		int Chunk::getHeight(float heightValue) const {

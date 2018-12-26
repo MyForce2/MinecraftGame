@@ -1,5 +1,7 @@
 #include "ChunkManager.h"
 #include "Math/Vectors/Vec2.h"
+#include <future>
+#include "Utils/Clock.h"
 
 namespace Minecraft {
 	namespace World {
@@ -46,29 +48,27 @@ namespace Minecraft {
 		}
 
 		void ChunkManager::loadWorld() {
-			//unsigned int coreCount = 1;// std::thread::hardware_concurrency();
-			//unsigned int chunksPerWorker = 2 / coreCount;
-			//std::thread* workers = new std::thread[coreCount];
-			//for (unsigned int i = 0; i < coreCount; i++) {
-			//	std::cout << "K" << std::endl;
-			//	IVec2 startPos(i * chunksPerWorker, i * chunksPerWorker);
-			//	IVec2 endPos(startPos.x + chunksPerWorker, startPos.x + chunksPerWorker);
-			//	std::thread t(&ChunkManager::addChunkRange, this, startPos, endPos);
-			//	t.join();
-			//	//addChunkRange(startPos, endPos);
-			//}
+			Utils::Clock c;
+			unsigned int coreCount = std::thread::hardware_concurrency();
+			unsigned int chunksPerWorker = 48 / coreCount;
+			std::thread* workers = new std::thread[coreCount];
+			IVec2 startPos(0, 0);
+			IVec2 endPos(2, 2);
+			for (unsigned int i = 0; i < coreCount; i++) {
+				workers[i] = std::thread(&ChunkManager::addChunkRange, this, startPos, endPos);
+				startPos.y += 2;
+				endPos.y += 2;
+			}
+			for (unsigned int i = 0; i < coreCount; i++) {
+				workers[i].join();
+			}
+			std::cout << "Time : " << c.getTimePassed() << std::endl;
+			std::cout << "Size : " << chunks.size() << std::endl;
+		}
 
-			std::thread c(&ChunkManager::addChunk, this, IVec2(0, 1));
-			c.join();
-			addChunk(IVec2(1, 0));
-			std::thread d(&ChunkManager::addChunk, this, IVec2(1, 1));
-			d.join();
-			
-			//addChunkRange(IVec2(0), IVec2(2));
+		void ChunkManager::initWorldGLData() {
 			for (Chunk* chunk : chunks)
 				chunk->initData(cubeData);
-			//delete[] workers;
-			std::cout << "Size : " << chunks.size() << std::endl;
 		}
 
 		void ChunkManager::addChunkRange(const IVec2& startPosition, const IVec2& endPosition) {
@@ -78,7 +78,9 @@ namespace Minecraft {
 			}
 		}
 
+
 		void ChunkManager::addChunk(const IVec2& chunkPosition) {
+			static std::mutex lock;
 			int worldX = chunkPosition.x * 20;
 			int worldY = chunkPosition.y * 20;
 			//if (worldX > WORLD_SIZE || worldY > WORLD_SIZE || worldX < 0 || worldY < 0)
@@ -86,7 +88,7 @@ namespace Minecraft {
 			//if (hasChunk(chunkPosition))
 			//	return;
 			Chunk* chunk = new Chunk(*heightMap, chunkPosition);
-			std::cout << "Chunk : " << Vec2(chunkPosition) << " Address : " << chunk << std::endl;
+			std::lock_guard<std::mutex> g(lock);
 			chunks.push_back(chunk);
 		}
 

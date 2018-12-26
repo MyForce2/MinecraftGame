@@ -54,6 +54,7 @@ namespace Minecraft {
 			void addChunk(const Engine::Math::IVec2& chunkPosition);
 			void addChunkRange(const Engine::Math::IVec2& startPosition, const Engine::Math::IVec2& endPosition);
 			void loadWorld();
+			void initWorldGLData();
 			
 			void updateRenderList(const Engine::Graphics::Camera& camera);
 			void render();

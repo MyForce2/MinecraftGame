@@ -35,7 +35,7 @@ namespace Minecraft {
 			Math::IVec2 chunkCoordinate;
 			Math::Vec2 center;
 
-			Graphics::VertexArray vao;
+			Graphics::VertexArray* vao;
 			Graphics::VertexBuffer* matrixBuffer;
 			Graphics::VertexBuffer* textureDataBuffer;
 			const Graphics::VertexBuffer* CUBE_DATA;
