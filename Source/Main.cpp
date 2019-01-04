@@ -59,7 +59,8 @@ int main() {
 
 
 	Camera camera = Camera(window, 0.1f, 500.f);
-	camera.setPosition(Vec3(0, 40.0f, 0));
+	camera.setPosition(Vec3(100.0f, 40.0f, 100.0f));
+	camera.setPosition(Vec3(0.f));
 
 	
 
@@ -104,7 +105,9 @@ int main() {
 	Label lbl("Hello", f);
 	lbl.setLabelColor(Vec3(255, 0, 0));
 	lbl.setStartPosition(Vec2(100));
-
+	Utils::Clock fps;
+	int frames = 0;
+	std::vector<int> frameCount;
 
 	while (window.isKeyReleased(GLFW_KEY_ESCAPE) && !window.isClosed()) {
 		l.startFrame();
@@ -113,7 +116,7 @@ int main() {
 		cManager->updateRenderList(camera);
 		cManager->render();
 		camera.update(window, clock.getTimePassed());
-		cManager->playerPosition = camera.getPosition();
+		cManager->setPlayerPosition(camera.getPosition());
 		clock.reset();
 		vp = camera.getProjectionMatrix() * camera.getViewMatrix();
 		shader.setUniformMatrix4fv("u_VP", vp);
@@ -121,8 +124,18 @@ int main() {
 		l.render();
 		glDisable(GL_BLEND);
 		window.update();
+		if (fps.getTimePassed() >= 1.0f) {
+			Utils::Log::getLog()->logInfo("FPS is : " + std::to_string(frames));
+			fps.reset();
+			frameCount.push_back(frames);
+			frames = 0;
+		}
+		frames++;
 	}
 	std::cout << "Hello" << std::endl;
+	int sum = 0;
+	std::for_each(frameCount.begin(), frameCount.end(), [&sum](int i) { sum += i; });
+	Utils::Log::getLog()->logInfo("Average FPS is : " + std::to_string(sum / frameCount.size()));
 
 	Log::getLog()->logInfo("End");
 	cManager->deleteManager();

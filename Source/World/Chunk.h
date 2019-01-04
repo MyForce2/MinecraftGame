@@ -11,29 +11,48 @@
 #include "Graphics/VertexArray.h"
 #include "Graphics/Shader.h"
 #include "CubeData.h"
-#include "HeightMap.h"
+#include "NoiseMap.h"
 #include <map>
 #include <unordered_map>
 #include <memory>
 #include <atomic>
-#include "Math/AABB.h"
+#include "Biomes/Biome.h"
+#include "AABB2D.h"
 
 namespace Minecraft {
 	namespace World {
 
 		struct BlockData {
+			// Which 3 textures does this cube use
 			Math::Vec3 textures;
+			// Is this cube currently visible
 			bool visible;
 		};
 
+
 		class Chunk {
 		private:
+
+			// Actual chunk data
+
+			// Maps cube data to a position in the world
 			std::unordered_map<Math::Vec3, BlockData> blocksData;
+			// Model matrices for all of the cubes
 			std::vector<Math::Mat4> renderData;
+			// 3 Textures each cube uses
 			std::vector<Math::Vec3> cubesTextures;
-			HeightMap& map;
+			// A heightmap for the world
+			NoiseMap& map;
+			// This chunk coordinate in the world
 			Math::IVec2 chunkCoordinate;
+			// The center position of this chunk in the world
 			Math::Vec2 center;
+			// This chunk 2D AABB
+			AABB2D boundingSquare;
+			// This chunks biome
+			Biome biome;
+
+			// OpenGL only chunk data
 
 			Graphics::VertexArray* vao;
 			Graphics::VertexBuffer* matrixBuffer;
@@ -49,12 +68,13 @@ namespace Minecraft {
 			static const std::atomic<int> DOWNWARDS_HEIGHT;
 
 		public:
-			Chunk(HeightMap& map, const Math::IVec2& chunkCoordinate);
+			Chunk(NoiseMap& map, const Math::IVec2& chunkCoordinate, BiomeType type);
 			~Chunk();
 
 			void render(const Graphics::Shader& shader) const;
 			inline const Math::IVec2& getChunkPosition() const { return chunkCoordinate; }
 			inline const Math::Vec2& getCenter() const { return center; }
+			inline const AABB2D getAABB2D() const { return boundingSquare; }
 
 		private:
 			// Inits the chunk's blocks

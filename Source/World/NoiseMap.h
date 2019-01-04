@@ -23,15 +23,19 @@ namespace Minecraft {
 		};
 
 		/*
-		A class used to generate a height map for the terrain using a noise algorithm
+		A class used to generate a height map for the terrain using a noise algorithm (Thread safe)
 		*/
-		class HeightMap {
+		class NoiseMap {
 		public:
-			utils::NoiseMap heightMap;
-			std::mutex lock;
+			utils::NoiseMap noiseMap;
+			std::mutex mapLock;
 
 		public:
-			HeightMap(const Engine::Math::IVec2& destinationSize, const Engine::Math::Vec2& bounds, const NoiseModuleData& data);
+			/*
+				Destination size = The range of acceptable values for this map
+				Bounds = The range of values sampled from the noise algorithm
+			*/
+			NoiseMap(const Engine::Math::IVec2& destinationSize, const Engine::Math::Vec2& bounds, const NoiseModuleData& data);
 
 			float operator[](const Engine::Math::IVec2& position);
 
