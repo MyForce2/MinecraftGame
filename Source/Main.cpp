@@ -52,10 +52,6 @@ int main() {
 	std::string f1("Source//Resources//Shaders//CubeFragment.shader");
 	std::string v2("Source//Resources//Shaders//BatchQuadVertex.shader");
 	std::string f2("Source//Resources//Shaders//BatchQuadFragment.shader");
-	std::string test = "HelloHelloHelloHelloHelloHelloHelloHello";
-	std::string test2 = "EHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHello";
-	std::string test3 = "HelloHelloHelloHelloHelloHelloHelloHello";
-	std::string test4 = "EHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHello";
 
 
 	Camera camera = Camera(window, 0.1f, 500.f);
@@ -83,9 +79,9 @@ int main() {
 
 	Layer2D l(600.f, 800.f, v2, f2);
 	FontManager* manager = FontManager::getFontManager();
-	const std::string fontPath = "Source//Resources/Fonts/Times New Roman.ttf";
-	manager->add(fontPath, 72);
-	auto f = manager->get(fontPath, 72);
+	const std::string fontPath = "Source//Resources/Fonts/arial.ttf";
+	manager->add(fontPath, 48);
+	auto f = manager->get(fontPath, 48);
 	ChunkManager* cManager = ChunkManager::getManager();
 	bool alt = false;
 	if (alt) {
@@ -104,7 +100,7 @@ int main() {
 	
 	Label lbl("Hello", f);
 	lbl.setLabelColor(Vec3(255, 0, 0));
-	lbl.setStartPosition(Vec2(100));
+	lbl.setStartPosition(Vec2(10, 560));
 	Utils::Clock fps;
 	int frames = 0;
 	std::vector<int> frameCount;
@@ -125,17 +121,15 @@ int main() {
 		glDisable(GL_BLEND);
 		window.update();
 		if (fps.getTimePassed() >= 1.0f) {
-			Utils::Log::getLog()->logInfo("FPS is : " + std::to_string(frames));
+			lbl.setText(std::to_string(frames));
 			fps.reset();
-			frameCount.push_back(frames);
 			frames = 0;
 		}
 		frames++;
 	}
 	std::cout << "Hello" << std::endl;
-	int sum = 0;
-	std::for_each(frameCount.begin(), frameCount.end(), [&sum](int i) { sum += i; });
-	Utils::Log::getLog()->logInfo("Average FPS is : " + std::to_string(sum / frameCount.size()));
+
+
 
 	Log::getLog()->logInfo("End");
 	cManager->deleteManager();

@@ -10,11 +10,11 @@ namespace Minecraft {
 		using namespace Math;
 
 		ChunkManager* ChunkManager::manager = nullptr;
-		const int ChunkManager::WORLD_SIZE = 6000;
+		const int ChunkManager::WORLD_SIZE = 2000;
 
-		const int ChunkManager::HEIGHT_NOISE_OCTAVE_COUNT = 2;
-		const double ChunkManager::HEIGHT_NOISE_FREQUENCY = 1.0;
-		const double ChunkManager::HEIGHT_NOISE_PERSISTENCE = 2.0;
+		const int ChunkManager::HEIGHT_NOISE_OCTAVE_COUNT = 1;
+		const double ChunkManager::HEIGHT_NOISE_FREQUENCY = 0.4;
+		const double ChunkManager::HEIGHT_NOISE_PERSISTENCE = 1.0;
 		const double ChunkManager::HEIGHT_MAP_BOUNDS = 50.0;
 
 		const int ChunkManager::BIOME_NOISE_OCTAVE_COUNT = 1;

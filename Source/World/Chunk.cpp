@@ -46,7 +46,6 @@ namespace Minecraft {
 			int centerHeight = getHeight(map[center]) + DOWNWARDS_HEIGHT + 1;
 			biome = centerHeight > 32 ? BiomeType::FOREST : BiomeType::DESERT;
 			IVec2 absChunkPos = vecAbs(chunkCoordinate);
-			bool hasEdges = absChunkPos.x == 300 || absChunkPos.y == 300;
 			for (int x = 0; x < CHUNK_SIZE; x++) {
 				for (int z = 0; z < CHUNK_SIZE; z++) {
 					// World position of this current column
@@ -71,9 +70,6 @@ namespace Minecraft {
 					blocksData[position].visible = true;
 				}
 			}
-
-			if (!hasEdges)
-				return;
 		
 			for (int x = 0; x < CHUNK_SIZE; x++) {
 				// World position of this column 
