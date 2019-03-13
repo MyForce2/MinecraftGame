@@ -12,6 +12,8 @@ layout(location = 4) in mat4 model;
 
 out vec3 v_Normal;
 out vec2 v_UV;
+// The fragment position in world space
+out vec3 v_FragmentPosition;
 
 uniform mat4 u_VP;
 const float TEXTURE_SIZE = 1.0f / (256.0f / 16.0f);
@@ -19,7 +21,9 @@ const float TEXTURE_SIZE = 1.0f / (256.0f / 16.0f);
 void main() {
 	mat4 mvp = u_VP * model;
 	gl_Position = mvp * position;
-	v_Normal = normal;
+	// Additional calculations so the normal is stil perpendicular to the surface incase it is scaled by a non uniform scale
+	v_Normal = mat3(transpose(inverse(model))) * normal;
+	v_FragmentPosition = vec3(model * vec4(normal, 1.0));
 	float texPos = 0.f;
 	if (gl_VertexID < 24)
 		// Cube sides

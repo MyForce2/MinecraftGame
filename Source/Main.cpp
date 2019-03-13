@@ -52,6 +52,8 @@ int main() {
 	std::string f1("Source//Resources//Shaders//CubeFragment.shader");
 	std::string v2("Source//Resources//Shaders//BatchQuadVertex.shader");
 	std::string f2("Source//Resources//Shaders//BatchQuadFragment.shader");
+	std::string v3("Source//Resources//Shaders//PPVertex.shader");
+	std::string f3("Source//Resources//Shaders//PPFragment.shader");
 
 
 	Camera camera = Camera(window, 0.1f, 500.f);
@@ -60,20 +62,46 @@ int main() {
 
 	
 
+	GLfloat PP_QUAD_VERTICES[] = {
+		1.0f,  1.0f, 1.0f, 1.0f,
+	   -1.0f,  1.0f, 0.0f, 1.0f,
+	   -1.0f, -1.0f, 0.0f, 0.0f,
+		1.0f, -1.0f, 1.0f, 0.0f,
+	};
 
+	GLushort PP_QUAD_INDICES[] = {
+		0, 1, 2,
+		0, 2, 3
+	};
 
-
+	VertexBuffer ppVBO(PP_QUAD_VERTICES, sizeof(PP_QUAD_VERTICES), GL_STATIC_DRAW);
+	IndexBuffer ppIBO(PP_QUAD_INDICES, 6);
+	VBLayout ppLayout;
+	VertexArray ppVAO;
+	ppLayout.addElement(2, GL_FLOAT);
+	ppLayout.addElement(2, GL_FLOAT);
+	ppVAO.addBuffer(ppVBO, ppLayout);
+	Shader ppShader(v3, f3);
+	ppShader.bind();
+	ppShader.setInt("u_TextureSlot", 0);
+	ppShader.setInt("u_PPEffect", 0);
+	
 	Mat4 vp = camera.getProjectionMatrix() * camera.getViewMatrix();
 	Shader shader(v1, f1);
 	shader.bind();
-
 	shader.setUniformMatrix4fv("u_VP", vp);
-	shader.setInt("u_TextureSlot", 0);
+	shader.setInt("u_TextureSlot", 1);
+	shader.setInt("u_EnableLighting", 1);
+	shader.setFloat("u_AmbientIntensity", 0.175f);
+	shader.setVec3("u_GlobalLightColor", clearColor);
+	shader.setVec3("u_LightColor", Vec3(1.0));
+	shader.setVec3("u_LightPosition", camera.getPosition());
 	Texture texture("Source//Resources/Textures/DefaultPack2.png", GL_NEAREST);
-	texture.setSlot();
+	texture.setSlot(1);
 	BasicRenderer r;
 	
 	std::cout << glGetError() << std::endl;
+
 
 	Utils::Clock clock;
 
@@ -83,19 +111,8 @@ int main() {
 	manager->add(fontPath, 48);
 	auto f = manager->get(fontPath, 48);
 	ChunkManager* cManager = ChunkManager::getManager();
-	bool alt = false;
-	if (alt) {
-		std::thread worker(&ChunkManager::loadWorld, cManager);
-		worker.join();
-	} else {
-		cManager->loadWorld();
-	}
+	cManager->loadWorld();
 	cManager->initWorldGLData();
-	//for (int i = 0; i < 2; i++) {
-	//	for (int j = 0; j < 2; j++) {
-	//		cManager->addChunk(IVec2(i, j));
-	//	}
-	//}
 	cManager->setShader(&shader);
 	
 	Label lbl("Hello", f);
@@ -105,17 +122,49 @@ int main() {
 	int frames = 0;
 	std::vector<int> frameCount;
 
+	FrameBuffer fbo(window.getSize().x, window.getSize().y);
+	fbo.bind();
+	fbo.bindRenderBuffer();
+	fbo.bindTexture();
+
+	bool lighting = true;
+	int ppEffect = 0;
+	Utils::Clock keyCooldown;
+	std::cout << glGetError() << std::endl;
+
 	while (window.isKeyReleased(GLFW_KEY_ESCAPE) && !window.isClosed()) {
 		l.startFrame();
 		l.add(lbl);
-		texture.setSlot();
+		if (window.isKeyPressed(GLFW_KEY_1) && keyCooldown.getTimePassed() > 0.25f) {
+			ppEffect = ppEffect == 5 ? 0 : ppEffect + 1;
+			ppShader.bind();
+			ppShader.setInt("u_PPEffect", ppEffect);
+			shader.bind();
+			keyCooldown.reset();
+		}
+		if (window.isKeyPressed(GLFW_KEY_2) && keyCooldown.getTimePassed() > 0.25f) {
+			lighting = !lighting;
+			shader.setInt("u_EnableLighting", lighting);
+			keyCooldown.reset();
+		}
+		glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0);
+		fbo.bind();
+		fbo.bindTexture();
+		FrameBuffer::clearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		texture.setSlot(1);
 		cManager->updateRenderList(camera);
 		cManager->render();
 		camera.update(window, clock.getTimePassed());
 		cManager->setPlayerPosition(camera.getPosition());
 		clock.reset();
+		fbo.unBind();
+		fbo.unBindTexture();
+		glClearColor(1.0, 1.0, 1.0, 1.0);
+		FrameBuffer::clearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		r.renderElements(ppVAO, ppShader, ppIBO);
 		vp = camera.getProjectionMatrix() * camera.getViewMatrix();
 		shader.setUniformMatrix4fv("u_VP", vp);
+		shader.setVec3("u_LightPosition", camera.getPosition());
 		glEnable(GL_BLEND);
 		l.render();
 		glDisable(GL_BLEND);
