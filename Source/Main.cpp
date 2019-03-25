@@ -30,7 +30,7 @@ using namespace World;
 int main() {
 	
 	Utils::Log::getLog()->logInfo("Start");
-	Window window = Window("Test", 720, 1080, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	Window window = Window("Test", 900, 1600, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	if(glewInit() != GLEW_OK) {
 		return EXIT_FAILURE;
@@ -96,6 +96,7 @@ int main() {
 	shader.setVec3("u_GlobalLightColor", clearColor);
 	shader.setVec3("u_LightColor", Vec3(1.0));
 	shader.setVec3("u_LightPosition", camera.getPosition());
+	shader.setVec3("u_GlobalLightDirection", Vec3(0.0, 1.0, 0.0));
 	Texture texture("Source//Resources/Textures/DefaultPack2.png", GL_NEAREST);
 	texture.setSlot(1);
 	BasicRenderer r;
@@ -115,7 +116,7 @@ int main() {
 	cManager->initWorldGLData();
 	cManager->setShader(&shader);
 	
-	Label lbl("Hello", f);
+	Label lbl("0", f);
 	lbl.setLabelColor(Vec3(255, 0, 0));
 	lbl.setStartPosition(Vec2(10, 560));
 	Utils::Clock fps;
@@ -127,7 +128,7 @@ int main() {
 	fbo.bindRenderBuffer();
 	fbo.bindTexture();
 
-	bool lighting = true;
+	bool cameraLighting = true, directionalLighting = true;
 	int ppEffect = 0;
 	Utils::Clock keyCooldown;
 	std::cout << glGetError() << std::endl;
@@ -143,8 +144,13 @@ int main() {
 			keyCooldown.reset();
 		}
 		if (window.isKeyPressed(GLFW_KEY_2) && keyCooldown.getTimePassed() > 0.25f) {
-			lighting = !lighting;
-			shader.setInt("u_EnableLighting", lighting);
+			cameraLighting = !cameraLighting;
+			shader.setInt("u_EnableCamera", cameraLighting);
+			keyCooldown.reset();
+		}
+		if (window.isKeyPressed(GLFW_KEY_3) && keyCooldown.getTimePassed() > 0.25f) {
+			directionalLighting = !directionalLighting;
+			shader.setInt("u_EnableSun", directionalLighting);
 			keyCooldown.reset();
 		}
 		glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0);
